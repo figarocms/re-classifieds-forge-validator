@@ -164,6 +164,113 @@
         <div class="shrink-0 w-8"></div>
       </div>
 
+      <!-- ═══════════ MODE FI9 : Affichage groupé programme / lots ═══════════ -->
+      <template v-if="isFI9Mode">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Colonne PROD -->
+          <div>
+            <div v-for="group in groupedProgramsProd" :key="'fi9-prod-' + group.programRef" class="mb-4">
+              <!-- Ligne programme -->
+              <button
+                @click="goToDetail(group.program)"
+                class="w-full text-left bg-slate-900/80 border border-sky-500/30 hover:border-sky-400/60 rounded-xl px-4 py-3 transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/10 group"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <div class="min-w-0 flex-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-sky-400/70 mr-2">🏗️ Programme</span>
+                    <span class="text-sm font-bold text-sky-300 font-mono">{{ getProgramRef(group.program) }}</span>
+                    <span v-if="group.program.fields?.titre_fr" class="text-slate-500 mx-2">—</span>
+                    <span v-if="group.program.fields?.titre_fr" class="text-sm font-semibold text-slate-200">{{ group.program.fields.titre_fr }}</span>
+                  </div>
+                  <div class="flex items-center gap-3 shrink-0">
+                    <span v-if="group.program.fields?.delivery_date_fr" class="text-xs text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">🗓 {{ group.program.fields.delivery_date_fr }}</span>
+                    <svg class="w-4 h-4 text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
+              <!-- Lots rattachés -->
+              <div v-if="group.lots.length > 0" class="ml-6 mt-1 space-y-1 border-l-2 border-sky-500/20 pl-3">
+                <button
+                  v-for="lot in group.lots"
+                  :key="'fi9-prod-lot-' + (lot.property?.reference || lot.id)"
+                  @click="goToDetail(lot)"
+                  class="w-full text-left bg-slate-800/50 border border-slate-700/30 hover:border-sky-500/30 rounded-lg px-3 py-2 transition-all duration-200 hover:shadow-md hover:shadow-sky-500/5 group"
+                >
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                      <span class="text-xs text-slate-500 mr-1.5">└</span>
+                      <span class="text-sm font-bold text-sky-300/80 font-mono">{{ getClientRef(lot) }}</span>
+                      <span class="text-slate-500 mx-2">•</span>
+                      <span class="text-sm text-slate-400">{{ lot.property_type?.name || '—' }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                      <span class="text-sm font-bold text-emerald-400">{{ formatPrice(lot.fields?.price_fr) }}</span>
+                      <svg class="w-4 h-4 text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colonne INTEG -->
+          <div>
+            <div v-for="group in groupedProgramsInteg" :key="'fi9-integ-' + group.programRef" class="mb-4">
+              <!-- Ligne programme -->
+              <button
+                @click="goToDetail(group.program)"
+                class="w-full text-left bg-slate-900/80 border border-amber-500/30 hover:border-amber-400/60 rounded-xl px-4 py-3 transition-all duration-200 hover:shadow-lg hover:shadow-amber-500/10 group"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <div class="min-w-0 flex-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400/70 mr-2">🏗️ Programme</span>
+                    <span class="text-sm font-bold text-amber-300 font-mono">{{ getProgramRef(group.program) }}</span>
+                    <span v-if="group.program.fields?.titre_fr" class="text-slate-500 mx-2">—</span>
+                    <span v-if="group.program.fields?.titre_fr" class="text-sm font-semibold text-slate-200">{{ group.program.fields.titre_fr }}</span>
+                  </div>
+                  <div class="flex items-center gap-3 shrink-0">
+                    <span v-if="group.program.fields?.delivery_date_fr" class="text-xs text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">🗓 {{ group.program.fields.delivery_date_fr }}</span>
+                    <svg class="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
+              <!-- Lots rattachés -->
+              <div v-if="group.lots.length > 0" class="ml-6 mt-1 space-y-1 border-l-2 border-amber-500/20 pl-3">
+                <button
+                  v-for="lot in group.lots"
+                  :key="'fi9-integ-lot-' + (lot.property?.reference || lot.id)"
+                  @click="goToDetail(lot)"
+                  class="w-full text-left bg-slate-800/50 border border-slate-700/30 hover:border-amber-500/30 rounded-lg px-3 py-2 transition-all duration-200 hover:shadow-md hover:shadow-amber-500/5 group"
+                >
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                      <span class="text-xs text-slate-500 mr-1.5">└</span>
+                      <span class="text-sm font-bold text-amber-300/80 font-mono">{{ getClientRef(lot) }}</span>
+                      <span class="text-slate-500 mx-2">•</span>
+                      <span class="text-sm text-slate-400">{{ lot.property_type?.name || '—' }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                      <span class="text-sm font-bold text-emerald-400">{{ formatPrice(lot.fields?.price_fr) }}</span>
+                      <svg class="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- ═══════════ MODE ANCIEN : Affichage classique (FI / PLF / Tous) ═══════════ -->
+      <template v-else>
       <!-- Annonces matchées (présentes dans les 2 environnements) -->
       <div v-if="matchedListings.length > 0" class="space-y-2 mb-6">
         <div
@@ -296,6 +403,7 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
 
     <!-- État vide -->
@@ -344,6 +452,7 @@ const portals = [
   { label: 'Tous', value: '' },
   { label: 'FI', value: '1' },
   { label: 'PLF', value: '9' },
+  { label: 'FI9', value: '2' },
 ]
 
 const hasSearched = ref(false)
@@ -423,6 +532,44 @@ const integOnlyListings = computed(() => {
     return !ref || !prodRefMap.value.has(ref)
   })
 })
+
+// ── Mode FI9 (immobilier neuf) : grouper les annonces par programme ──
+const isFI9Mode = computed(() => form.mediaId === '2')
+
+// Regroupe les annonces d'un environnement en { program, lots[] }
+function groupByProgram(listings: any[]): Array<{ programRef: string; program: any; lots: any[] }> {
+  // Identifier les programmes (is_program === true)
+  const programs = listings.filter((l: any) => l.property?.is_program === true)
+  const lots = listings.filter((l: any) => l.property?.is_program !== true)
+  const groups: Array<{ programRef: string; program: any; lots: any[] }> = []
+
+  for (const prog of programs) {
+    const progGwCode = prog.property?.gateway_code || ''
+    const progRef = prog.property?.reference || ''
+    // Rattacher les lots dont le gateway_code commence par celui du programme + '_'
+    const matchedLots = lots.filter((lot: any) => {
+      const lotGwCode = lot.property?.gateway_code || ''
+      return lotGwCode.startsWith(progGwCode + '_')
+    })
+    groups.push({ programRef: progRef, program: prog, lots: matchedLots })
+  }
+
+  // Lots orphelins (pas rattachés à un programme connu) — les afficher comme des programmes individuels
+  const attachedLotIds = new Set(groups.flatMap(g => g.lots.map((l: any) => l.id)))
+  const orphanLots = lots.filter((l: any) => !attachedLotIds.has(l.id))
+  for (const orphan of orphanLots) {
+    groups.push({ programRef: orphan.property?.reference || '', program: orphan, lots: [] })
+  }
+
+  return groups
+}
+
+const groupedProgramsProd = computed(() => groupByProgram(prodResults.value))
+const groupedProgramsInteg = computed(() => groupByProgram(integResults.value))
+
+function getProgramRef(listing: any): string {
+  return listing?.property?.reference || '—'
+}
 
 function selectPortal(value: string) {
   form.mediaId = value
@@ -523,21 +670,12 @@ function formatPrice(price: any): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num)
 }
 
-// URLs API réelles (remontées par le serveur)
+// URLs API réelles (remontées par le serveur via _apiUrl)
 function getApiUrl(env: string): string {
   const data = env === 'PROD' ? prodData.value : integData.value
   if (data?._apiUrl) return data._apiUrl
-  // Fallback si pas encore chargé
-  const baseUrls: Record<string, string> = {
-    PROD: 'https://explorimmobox.explorimmo.com/v2/listings.json?api_key=immobox',
-    INTEG: 'https://imb-integration.vip.adencf.local/v2/listings.json?api_key=immobox',
-  }
-  const code = encodeURIComponent(form.codeAgence)
-  let url = `${baseUrls[env] || ''}&filters[property.gateway_code]=${code}_*&filters[status]=3&start=0&limit=1000`
-  if (form.mediaId) {
-    url += `&filters[media_id]=${encodeURIComponent(form.mediaId)}`
-  }
-  return url
+  // Pas de fallback avec la clé API — les URLs sont gérées côté serveur uniquement
+  return ''
 }
 
 function openApiUrl(env: string) {

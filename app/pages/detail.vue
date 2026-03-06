@@ -62,6 +62,12 @@
                 alt="Propriétés Le Figaro"
                 class="w-6 h-6 rounded ml-1.5"
               />
+              <img
+                v-if="searchParams.mediaId === '2'"
+                src="/logos/fi9.svg"
+                alt="Figaro Immoneuf"
+                class="w-6 h-6 rounded ml-1.5"
+              />
             </p>
             <div class="flex flex-wrap items-center gap-2 mt-2">
               <button
@@ -302,7 +308,7 @@ useHead({
 const router = useRouter()
 const route = useRoute()
 
-const { selectedProdListing, selectedIntegListing, selectedRef, selectListing, searchParams } = useCompare()
+const { selectedProdListing, selectedIntegListing, selectedRef, selectListing, searchParams, prodData, integData } = useCompare()
 
 // Si la ref vient de l'URL (rechargement de page), la restaurer
 const refFromQuery = route.query.ref as string
@@ -319,16 +325,22 @@ const photosExpanded = ref(true)
 // Copy URL spécifique à l'annonce
 const copiedEnv = ref('')
 
-const LISTING_BASE_URLS: Record<string, string> = {
-  PROD: 'https://explorimmobox.explorimmo.com/v2/listings.json?api_key=immobox',
-  INTEG: 'https://imb-integration.vip.adencf.local/v2/listings.json?api_key=immobox',
-}
+// URLs API remontées par le serveur
+const prodApiUrl = computed(() => prodData.value?._apiUrl || '')
+const integApiUrl = computed(() => integData.value?._apiUrl || '')
 
+// URLs des annonces individuelles (construites à partir de _apiUrl du serveur)
 function getListingUrl(env: string): string {
   const listing = env === 'PROD' ? prodListing.value : integListing.value
   const reference = listing?.property?.reference
   if (!reference) return ''
-  return `${LISTING_BASE_URLS[env]}&filters[property.reference]=${encodeURIComponent(reference)}&start=0&limit=1`
+  // Utiliser _apiUrl du composable (remontée par le serveur)
+  const data = env === 'PROD' ? prodApiUrl.value : integApiUrl.value
+  if (!data) return ''
+  // Extraire la base URL (avant les filtres) et construire l'URL d'annonce individuelle
+  const baseMatch = data.match(/^[^?]+\?api_key=[^&]+/)
+  if (!baseMatch) return ''
+  return `${baseMatch[0]}&filters[property.reference]=${encodeURIComponent(reference)}&start=0&limit=1`
 }
 
 function openListingUrl(env: string) {
@@ -457,11 +469,32 @@ const fieldDefinitions = [
       { label: 'Vidéo', path: 'fields.video_fr' },
     ],
   },
+  {
+    name: 'Programme Neuf',
+    icon: '🏗️',
+    fi9Only: true,
+    fields: [
+      { label: 'Nom du programme', path: 'fields.titre_fr' },
+      { label: 'Date de livraison', path: 'fields.delivery_date_fr' },
+      { label: 'Est un programme', path: '_isProgram' },
+      { label: 'Statut fiscal', path: 'fields.tax_status_fr' },
+      { label: 'Étage', path: 'fields.etage_fr' },
+      { label: 'Parking', path: 'fields.parking_fr' },
+      { label: 'Lot détaillé', path: 'fields.detailed_lot_fr' },
+      { label: 'Visite virtuelle 3D', path: 'fields.virtual_tour_3d_fr' },
+      { label: 'Bureau de vente', path: 'fields.sales_office_address_fr' },
+      { label: 'Horaires bureau de vente', path: 'fields.sales_office_schedule_fr' },
+      { label: 'ID programme parent', path: 'property.program_id' },
+      { label: 'ID listing programme', path: 'listing_program_id' },
+    ],
+  },
 ]
 
 // Comparaison des champs
 const comparisonCategories = computed(() => {
-  return fieldDefinitions.map((cat) => ({
+  return fieldDefinitions
+    .filter((cat: any) => !cat.fi9Only || searchParams.value.mediaId === '2')
+    .map((cat) => ({
     ...cat,
     fields: cat.fields.map((field: any) => ({
       ...field,
@@ -500,6 +533,9 @@ function getFieldValue(obj: any, path: string): string {
   }
   if (path === '_propertyTypeFamilyName') {
     return obj.property_type?.property_type_family?.name || '—'
+  }
+  if (path === '_isProgram') {
+    return obj.property?.is_program === true ? 'Oui' : 'Non'
   }
 
   const parts = path.split('.')

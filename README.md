@@ -17,6 +17,12 @@ Validateur Forge/
 ├── server/
 │   └── api/
 │       └── compare.ts              # Route serveur proxy (gère CORS + SSL)
+├── directives/                     # 📋 Couche 1 — SOPs (le "Quoi")
+│   ├── sop-validation-csv.md       # Règles de validation CSV
+│   ├── sop-comparaison-annonces.md # Comparaison PROD vs INTEG
+│   └── sop-deploiement.md          # Déploiement Docker / PM2
+├── execution/                      # ⚙️ Couche 3 — Scripts déterministes (le "Comment")
+├── .tmp/                           # Fichiers intermédiaires (gitignored)
 ├── Dockerfile                      # Image Docker multi-stage
 ├── docker-compose.yml              # Orchestration Docker
 ├── ecosystem.config.cjs            # Config PM2 (alternative sans Docker)
@@ -56,7 +62,7 @@ La route `server/api/compare.ts` sert de **proxy backend** entre le navigateur e
 | `partenaire` | string | ✅ | Nom du partenaire (ex: Netty, Apimo) |
 | `codeAgence` | string | ✅ | Code de l'agence |
 | `refClient` | string | ❌ | Référence client (wildcard si vide) |
-| `mediaId` | string | ❌ | Portail de publication : `1` = FI, `9` = PLF |
+| `mediaId` | string | ❌ | Portail de publication : `1` = FI, `9` = PLF, `2` = FI9 |
 | `env` | string | ✅ | Environnement : `PROD` ou `INTEG` |
 
 ### Filtre Portail de publication
@@ -65,8 +71,18 @@ Le formulaire de recherche propose un **groupe de boutons segmentés** (Tous / F
 - **Tous** (par défaut) : aucun filtre portail, retourne toutes les annonces
 - **FI** (Figaro Immobilier) : ajoute `filters[media_id]=1` à l'URL API
 - **PLF** (Propriétés Le Figaro) : ajoute `filters[media_id]=9` à l'URL API
+- **FI9** (Figaro Immoneuf) : ajoute `filters[media_id]=2` à l'URL API
 
 Ce filtre est optionnel et permet d'affiner la recherche lorsqu'un code agence est utilisé sur plusieurs portails.
+
+### Mode FI9 (immobilier neuf)
+
+Le portail **FI9** concerne l'immobilier neuf. Les annonces sont structurées en **programmes** et **lots** :
+
+- Un **programme** (`property.is_program = true`) représente le projet immobilier global (résidence)
+- Un ou plusieurs **lots** (`property.is_program = false`) sont rattachés au programme via le `gateway_code` (le lot possède un `gateway_code` qui commence par celui du programme + `_`)
+
+En mode FI9, la liste des annonces affiche les programmes en tête avec leur nom (`fields.titre_fr`) et les lots indentés en dessous. La page de détail affiche une catégorie supplémentaire **« Programme Neuf »** avec les champs spécifiques (date de livraison, statut fiscal, bureau de vente, etc.).
 
 ### URLs ciblées
 
@@ -88,6 +104,7 @@ Ce filtre est optionnel et permet d'affiner la recherche lorsqu'un code agence e
 | 👤 Contact | Nom, Email, Téléphone |
 | 💰 Financier | Prix, Charges, Honoraires |
 | 📸 Médias | Nombre de photos (OK si identique) |
+| 🏗️ Programme Neuf (FI9) | Nom du programme, date de livraison, statut fiscal, étage, parking, visite virtuelle 3D, bureau de vente |
 
 ### Statuts visuels
 
@@ -95,6 +112,18 @@ Ce filtre est optionnel et permet d'affiner la recherche lorsqu'un code agence e
 - 🔴 **DIFF** : Valeurs différentes (sensible à la casse et aux espaces)
 - 🟠 **MANQUE INTEG** / **MANQUE PROD** : Donnée présente d'un côté mais absente de l'autre (potentiel dysfonctionnement)
 - ⚪ **N/A** : Donnée absente des deux côtés (non transmise par la source)
+
+## 🧠 Architecture Agentique
+
+Le projet suit une **architecture à 3 couches** pour maximiser la fiabilité et la maintenabilité :
+
+| Couche | Rôle | Emplacement |
+|---|---|---|
+| **1. Directive** (le "Quoi") | SOPs en Markdown — instructions de haut niveau | `directives/` |
+| **2. Orchestration** (le "Cerveau") | L'agent IA — routage intelligent et gestion des erreurs | Agent Claude |
+| **3. Exécution** (le "Comment") | Scripts déterministes et testables | `execution/` + `server/api/` |
+
+Les directives sont des **documents vivants** : à chaque erreur ou nouveau cas découvert, la SOP correspondante est mise à jour (principe de *self-annealing*).
 
 ## 📋 Prochaines Évolutions
 - [ ] Affichage des photos miniatures pour comparaison visuelle.
