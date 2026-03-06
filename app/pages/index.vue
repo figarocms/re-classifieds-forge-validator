@@ -507,11 +507,24 @@ function valuesEqualForCompare(pv: string, iv: string): boolean {
   return false
 }
 
+// For confort_fr, strip "vue_degage" from integ array before comparing (INTEG-only quirk)
+function integValueForConfortCompare(iv: string): string {
+  try {
+    const arr = JSON.parse(iv)
+    if (Array.isArray(arr)) {
+      const filtered = arr.filter((x: any) => String(x).toLowerCase() !== 'vue_degage')
+      return JSON.stringify(filtered)
+    }
+  } catch (_) {}
+  return iv
+}
+
 function getDiffCount(prod: any, integ: any): number {
   let diffs = 0
   for (const path of compareFields) {
-    const pv = getNestedValue(prod, path)
-    const iv = getNestedValue(integ, path)
+    let pv = getNestedValue(prod, path)
+    let iv = getNestedValue(integ, path)
+    if (path === 'fields.confort_fr') iv = integValueForConfortCompare(iv)
     // Ne compter que si les 2 valeurs existent et sont différentes (array order ignored)
     if (pv && iv && !valuesEqualForCompare(pv, iv)) diffs++
   }

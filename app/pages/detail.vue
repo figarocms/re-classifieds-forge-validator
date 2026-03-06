@@ -63,6 +63,16 @@
                 class="w-6 h-6 rounded ml-1.5"
               />
             </p>
+            <p v-if="prodListing || integListing" class="text-xs text-slate-500 mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span v-if="prodListing" class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                Dernière modif. PROD : {{ getLastModification(prodListing) }}
+              </span>
+              <span v-if="integListing" class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                Dernière modif. INTEG : {{ getLastModification(integListing) }}
+              </span>
+            </p>
             <div class="flex flex-wrap items-center gap-2 mt-2">
               <button
                 v-if="prodListing"
@@ -70,11 +80,8 @@
                 class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-sky-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-sky-500/30 rounded-lg px-2.5 py-1.5 transition-all"
                 :title="getListingUrl('PROD')"
               >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
                 <span class="w-2 h-2 rounded-full bg-sky-400"></span>
-                JSON PROD
+                API PROD
               </button>
               <button
                 v-if="integListing"
@@ -82,33 +89,71 @@
                 class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-amber-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-amber-500/30 rounded-lg px-2.5 py-1.5 transition-all"
                 :title="getListingUrl('INTEG')"
               >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
                 <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                JSON INTEG
+                API INTEG
               </button>
               <span class="w-px h-4 bg-slate-700 mx-1"></span>
-              <button
-                @click="exportPdf"
-                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-emerald-500/30 rounded-lg px-2.5 py-1.5 transition-all"
-                title="Imprimer / Exporter en PDF"
+              <a
+                v-if="prodListing?.id"
+                :href="getBackendListingUrl('PROD', prodListing.id)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-sky-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-sky-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+                :title="`Backend PROD — ID ${prodListing.id}`"
+              >
+                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                BO PROD
+              </a>
+              <a
+                v-if="integListing?.id"
+                :href="getBackendListingUrl('INTEG', integListing.id)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-amber-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-amber-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+                :title="`Backend INTEG — ID ${integListing.id}`"
+              >
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                BO INTEG
+              </a>
+              <span class="w-px h-4 bg-slate-700 mx-1"></span>
+              <a
+                v-if="temporalWorkflowsUrl"
+                :href="temporalWorkflowsUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-indigo-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+                :title="`Temporal — CustomerReference=${selectedRef}`"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Imprimer PDF
-              </button>
+                TEMPORAL
+              </a>
+              <span class="w-px h-4 bg-slate-700 mx-1"></span>
               <button
-                @click="exportComparisonJson"
-                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-emerald-500/30 rounded-lg px-2.5 py-1.5 transition-all"
-                title="Exporter le résultat de comparaison en JSON"
+                v-if="findOriginParams"
+                @click="copyFindOrigin"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-violet-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+                :title="findOriginCommand"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                Export comparaison
+                FORGE FILE
               </button>
+              <button
+                v-if="findOriginMapCommand"
+                @click="copyFindOriginMap"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-violet-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+                :title="findOriginMapCommand"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                FORGE FILE & MAP
+              </button>
+              <span v-if="copiedFindOrigin" class="text-xs text-emerald-400 ml-1">Copié</span>
             </div>
           </div>
         </div>
@@ -319,10 +364,75 @@ const photosExpanded = ref(true)
 // Copy URL spécifique à l'annonce
 const copiedEnv = ref('')
 
+// Params pour make find-origin / find-origin-map (priorité INTEG puis PROD)
+const findOriginParams = computed(() => {
+  const listing = integListing.value || prodListing.value
+  if (!listing?.property?.reference) return null
+  const ref = listing.property.reference
+  const advertiserId = listing.property.advertiser_id ?? listing.advertiser_id
+  if (advertiserId == null) return null
+  const gw = listing.gateways
+  const gatewayName = Array.isArray(gw) && gw.length > 0 ? (gw[0]?.name || gw[0]?.code || '') : ''
+  return { reference: ref, advertiserId: String(advertiserId), gatewayId: String(gatewayName).toLowerCase() || undefined }
+})
+
+const findOriginCommand = computed(() => {
+  const p = findOriginParams.value
+  if (!p) return ''
+  return `make find-origin REFERENCE=${p.reference} ADVERTISER_ID=${p.advertiserId}`
+})
+
+const findOriginMapCommand = computed(() => {
+  const p = findOriginParams.value
+  if (!p || !p.gatewayId) return ''
+  return `make find-origin-map REFERENCE=${p.reference} ADVERTISER_ID=${p.advertiserId} GATEWAY_ID=${p.gatewayId}`
+})
+
+const copiedFindOrigin = ref<'find-origin' | 'find-origin-map' | null>(null)
+
+async function copyFindOrigin() {
+  const cmd = findOriginCommand.value
+  if (!cmd) return
+  try {
+    await navigator.clipboard.writeText(cmd)
+    copiedFindOrigin.value = 'find-origin'
+    setTimeout(() => { copiedFindOrigin.value = null }, 2000)
+  } catch (_) {}
+}
+
+async function copyFindOriginMap() {
+  const cmd = findOriginMapCommand.value
+  if (!cmd) return
+  try {
+    await navigator.clipboard.writeText(cmd)
+    copiedFindOrigin.value = 'find-origin-map'
+    setTimeout(() => { copiedFindOrigin.value = null }, 2000)
+  } catch (_) {}
+}
+
 const LISTING_BASE_URLS: Record<string, string> = {
   PROD: 'https://explorimmobox.explorimmo.com/v2/listings.json?api_key=immobox',
   INTEG: 'https://imb-integration.vip.adencf.local/v2/listings.json?api_key=immobox',
 }
+
+const BACKEND_ADMIN_BASE_URLS: Record<string, string> = {
+  PROD: 'https://explorimmobox.explorimmo.com/v1/backend.php/listing/',
+  INTEG: 'http://imb-integration.vip.adencf.local/v1/backend.php/listing/',
+}
+
+function getBackendListingUrl(env: string, immoboxId: number | string): string {
+  const base = BACKEND_ADMIN_BASE_URLS[env]
+  return base ? `${base}${immoboxId}` : ''
+}
+
+const TEMPORAL_WORKFLOWS_BASE = 'http://localhost:8233/namespaces/default/workflows'
+
+const temporalWorkflowsUrl = computed(() => {
+  const ref = selectedRef.value || integListing.value?.property?.reference || prodListing.value?.property?.reference
+  if (!ref) return ''
+  const query = '`CustomerReference`="' + ref + '"'
+  return `${TEMPORAL_WORKFLOWS_BASE}?query=${encodeURIComponent(query)}`
+})
 
 function getListingUrl(env: string): string {
   const listing = env === 'PROD' ? prodListing.value : integListing.value
@@ -370,6 +480,14 @@ function getMainTitle(): string {
   return [ref, type, city].filter(Boolean).join(' — ')
 }
 
+function getLastModification(listing: any): string {
+  const raw = listing?.updated_at
+  if (!raw || raw === 'null') return '—'
+  const d = new Date(raw)
+  if (isNaN(d.getTime())) return String(raw)
+  return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'medium' }).format(d)
+}
+
 // Définition des catégories de comparaison (sans Médias car les photos sont affichées en vignettes)
 const fieldDefinitions = [
   {
@@ -402,12 +520,22 @@ const fieldDefinitions = [
       { label: 'Surface terrain (m²)', path: 'fields.surface_terrain_fr' },
       { label: 'Pièces', path: 'fields.nb_piece_fr' },
       { label: 'Chambres', path: 'fields.nb_chambre_fr' },
-      { label: 'Confort', path: 'fields.confort_fr' },
       { label: 'Exposition', path: 'fields.exposition_fr' },
       { label: 'Salles de bains', path: 'fields.nb_sd_bains_fr' },
       { label: 'Visite virtuelle', path: 'fields.visite_virtuelle_fr' },
       { label: 'Copropriété', path: 'fields.copropriete_fr' },
       { label: 'État', path: 'fields.etat_fr' },
+    ],
+  },
+  {
+    name: 'Equipement',
+    icon: '🛋️',
+    fields: [
+      { label: 'Type de chauffage', path: 'fields.type_chauffage_fr' },
+      { label: 'Type de cuisine', path: 'fields.type_cuisine_fr' },
+      { label: 'Meublé', path: 'fields.meuble_fr' },
+      { label: 'Confort', path: 'fields.confort_fr' },
+      { label: 'Confort PDF', path: 'fields.confort_pdf_fr' },
     ],
   },
   {
@@ -518,9 +646,22 @@ function getFieldValue(obj: any, path: string): string {
   return String(value)
 }
 
+// For confort_fr, strip "vue_degage" from integ array before comparing (INTEG-only quirk)
+function integValueForConfortCompare(iv: string): string {
+  try {
+    const arr = JSON.parse(iv)
+    if (Array.isArray(arr)) {
+      const filtered = arr.filter((x: any) => String(x).toLowerCase() !== 'vue_degage')
+      return JSON.stringify(filtered)
+    }
+  } catch (_) {}
+  return iv
+}
+
 function getStatusText(field: any): string {
   const pv = String(field.prodValue ?? '—')
-  const iv = String(field.integValue ?? '—')
+  let iv = String(field.integValue ?? '—')
+  if (field.path === 'fields.confort_fr') iv = integValueForConfortCompare(iv)
   if (pv === '—' && iv === '—') return 'N/A'
   if (pv !== '—' && iv === '—') return 'MANQUE INTEG'
   if (pv === '—' && iv !== '—') return 'MANQUE PROD'
