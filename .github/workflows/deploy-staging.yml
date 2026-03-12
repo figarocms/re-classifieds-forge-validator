@@ -5,6 +5,7 @@
       branches: [master]
   
   env:
+    PROJECT_NUMBER: 140750957422
     PROJECT_ID: project-staging1
     REGION: europe-west1
     SERVICE_NAME: validateur-forge
@@ -25,7 +26,7 @@
           uses: google-github-actions/auth@v2
           with:
             workload_identity_provider: >-
-              projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+              projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
             service_account: vibecoding-deploy@project-staging1.iam.gserviceaccount.com
   
         - uses: google-github-actions/setup-gcloud@v2
