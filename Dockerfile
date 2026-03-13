@@ -21,13 +21,10 @@ WORKDIR /app
 # Copier uniquement le build Nuxt (Nitro server autonome)
 COPY --from=builder /app/.output .output
 
-# Port par défaut de Nitro
+# Cloud Run injecte PORT automatiquement
 ENV HOST=0.0.0.0
-ENV PORT=3000
-# Autoriser les certificats auto-signés (nécessaire pour INTEG .local)
-ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
-EXPOSE 3000
+EXPOSE 8080
 
 # Lancer le serveur Nitro
 CMD ["node", ".output/server/index.mjs"]

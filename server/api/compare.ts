@@ -1,10 +1,8 @@
-const BASE_URLS = {
-    PROD: 'https://explorimmobox.explorimmo.com/v2/listings.json?api_key=immobox',
-    INTEG: 'https://imb-integration.vip.adencf.local/v2/listings.json?api_key=immobox',
-} as const
-
 function buildApiUrl(env: 'PROD' | 'INTEG', partenaire: string, codeAgence: string, refClient: string, mediaId: string): string {
-    const baseUrl = BASE_URLS[env]
+    const config = useRuntimeConfig()
+    const baseUrl = env === 'PROD'
+        ? `${config.apiBaseUrlProd}?api_key=${config.apiKey}`
+        : `${config.apiBaseUrlInteg}?api_key=${config.apiKey}`
     const encodedPartner = encodeURIComponent(partenaire)
     const encodedAgency = encodeURIComponent(codeAgence)
 

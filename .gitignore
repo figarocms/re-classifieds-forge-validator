@@ -18,6 +18,9 @@ logs
 .fleet
 .idea
 
+# Architecture agentique — fichiers intermédiaires
+.tmp/
+
 # Local env files
 .env
 .env.*

@@ -55,6 +55,22 @@
               — {{ getMainTitle() }}
               <span v-if="refCopied" class="text-primary-400 text-xs">Copié</span>
             </p>
+            <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
+              <div v-if="prodListing" class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-sky-300">PROD:</span>
+                <span>{{ prodModifiedDate }}</span>
+              </div>
+              <div v-if="integListing" class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-amber-300">INTEG:</span>
+                <span>{{ integModifiedDate }}</span>
+              </div>
+            </div>
             <p v-if="searchParams.partenaire || searchParams.codeAgence" class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -70,6 +86,12 @@
                 v-if="searchParams.mediaId === '9'"
                 src="/logos/plf.svg"
                 alt="Propriétés Le Figaro"
+                class="w-6 h-6 rounded ml-1.5"
+              />
+              <img
+                v-if="searchParams.mediaId === '2'"
+                src="/logos/fi9.svg"
+                alt="Figaro Immoneuf"
                 class="w-6 h-6 rounded ml-1.5"
               />
             </p>
@@ -357,7 +379,7 @@ useHead({
 const router = useRouter()
 const route = useRoute()
 
-const { selectedProdListing, selectedIntegListing, selectedRef, selectListing, searchParams } = useCompare()
+const { selectedProdListing, selectedIntegListing, selectedRef, selectListing, searchParams, prodData, integData } = useCompare()
 
 // Si la ref vient de l'URL (rechargement de page), la restaurer
 const refFromQuery = route.query.ref as string
@@ -460,7 +482,13 @@ function getListingUrl(env: string): string {
   const listing = env === 'PROD' ? prodListing.value : integListing.value
   const reference = listing?.property?.reference
   if (!reference) return ''
-  return `${LISTING_BASE_URLS[env]}&filters[property.reference]=${encodeURIComponent(reference)}&start=0&limit=1`
+  // Utiliser _apiUrl du composable (remontée par le serveur)
+  const data = env === 'PROD' ? prodData.value?._apiUrl : integData.value?._apiUrl
+  if (!data) return ''
+  // Extraire la base URL (avant les filtres) et construire l'URL d'annonce individuelle
+  const baseMatch = data.match(/^[^?]+\?api_key=[^&]+/)
+  if (!baseMatch) return ''
+  return `${baseMatch[0]}&filters[property.reference]=${encodeURIComponent(reference)}&start=0&limit=1`
 }
 
 function openListingUrl(env: string) {
@@ -508,6 +536,35 @@ function getLastModification(listing: any): string {
   if (isNaN(d.getTime())) return String(raw)
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'medium' }).format(d)
 }
+
+function formatDate(dateString: string | undefined | null): string {
+  if (!dateString) return '—'
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return '—'
+    return new Intl.DateTimeFormat('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date)
+  } catch {
+    return '—'
+  }
+}
+
+const prodModifiedDate = computed(() => {
+  const listing = prodListing.value
+  if (!listing) return '—'
+  return formatDate(listing.updated_at || listing.modified_at || listing.last_modified)
+})
+
+const integModifiedDate = computed(() => {
+  const listing = integListing.value
+  if (!listing) return '—'
+  return formatDate(listing.updated_at || listing.modified_at || listing.last_modified)
+})
 
 // Définition des catégories de comparaison (sans Médias car les photos sont affichées en vignettes)
 const fieldDefinitions = [
@@ -610,11 +667,32 @@ const fieldDefinitions = [
       { label: 'Vidéo', path: 'fields.video_fr' },
     ],
   },
+  {
+    name: 'Programme Neuf',
+    icon: '🏗️',
+    fi9Only: true,
+    fields: [
+      { label: 'Nom du programme', path: 'fields.titre_fr' },
+      { label: 'Date de livraison', path: 'fields.delivery_date_fr' },
+      { label: 'Est un programme', path: '_isProgram' },
+      { label: 'Statut fiscal', path: 'fields.tax_status_fr' },
+      { label: 'Étage', path: 'fields.etage_fr' },
+      { label: 'Parking', path: 'fields.parking_fr' },
+      { label: 'Lot détaillé', path: 'fields.detailed_lot_fr' },
+      { label: 'Visite virtuelle 3D', path: 'fields.virtual_tour_3d_fr' },
+      { label: 'Bureau de vente', path: 'fields.sales_office_address_fr' },
+      { label: 'Horaires bureau de vente', path: 'fields.sales_office_schedule_fr' },
+      { label: 'ID programme parent', path: 'property.program_id' },
+      { label: 'ID listing programme', path: 'listing_program_id' },
+    ],
+  },
 ]
 
 // Comparaison des champs
 const comparisonCategories = computed(() => {
-  return fieldDefinitions.map((cat) => ({
+  return fieldDefinitions
+    .filter((cat: any) => !cat.fi9Only || searchParams.value.mediaId === '2')
+    .map((cat) => ({
     ...cat,
     fields: cat.fields.map((field: any) => ({
       ...field,
@@ -654,6 +732,9 @@ function getFieldValue(obj: any, path: string): string {
   if (path === '_propertyTypeFamilyName') {
     return obj.property_type?.property_type_family?.name || '—'
   }
+  if (path === '_isProgram') {
+    return obj.property?.is_program === true ? 'Oui' : 'Non'
+  }
 
   const parts = path.split('.')
   let value = obj
@@ -664,7 +745,17 @@ function getFieldValue(obj: any, path: string): string {
 
   if (value == null || value === '') return '—'
   if (typeof value === 'object') {
-    if (Array.isArray(value)) return JSON.stringify(value)
+    if (Array.isArray(value)) {
+      // Special handling for confort arrays: remove "vue_degagee" and sort
+      if (path === 'fields.confort_fr') {
+        const filtered = value.filter((item: any) => item !== 'vue_degagee')
+        const sorted = [...filtered].sort((a: any, b: any) => String(a).localeCompare(String(b)))
+        return JSON.stringify(sorted)
+      }
+      // For other arrays, sort them before stringifying
+      const sorted = [...value].sort((a: any, b: any) => String(a).localeCompare(String(b)))
+      return JSON.stringify(sorted)
+    }
     if (value.name) return String(value.name)
     return JSON.stringify(value)
   }
