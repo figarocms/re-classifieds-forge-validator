@@ -4,7 +4,7 @@
     <div class="mb-6">
       <button
         @click="goBack"
-        class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors group"
+        class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-primary-400 transition-colors group"
       >
         <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -24,7 +24,7 @@
       <p class="text-sm text-slate-500 mb-6">Retournez à la liste pour sélectionner une annonce à comparer.</p>
       <button
         @click="goBack"
-        class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 shadow-lg shadow-emerald-500/20"
+        class="bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 shadow-lg shadow-primary-500/20"
       >
         Retour à la liste
       </button>
@@ -35,7 +35,7 @@
       <!-- Titre de l'annonce -->
       <div class="bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-2xl p-5 shadow-xl">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
             </svg>
@@ -43,7 +43,17 @@
           <div>
             <h2 class="text-lg font-bold text-slate-200">Comparaison PROD vs INTEG</h2>
             <p class="text-sm text-slate-400">
-              Annonce {{ selectedRef }} — {{ getMainTitle() }}
+              Annonce
+              <button
+                v-if="selectedRef"
+                type="button"
+                @click="copyRefToClipboard"
+                class="inline-flex items-center gap-1.5 font-mono hover:text-primary-400 focus:text-primary-400 focus:outline-none rounded px-1 -mx-1 hover:bg-slate-700/50 focus:bg-slate-700/50 transition-colors"
+                :title="`Copier ${selectedRef}`"
+              >{{ selectedRef }}</button>
+              <template v-else>{{ selectedRef }}</template>
+              — {{ getMainTitle() }}
+              <span v-if="refCopied" class="text-primary-400 text-xs">Copié</span>
             </p>
             <p v-if="searchParams.partenaire || searchParams.codeAgence" class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -121,7 +131,7 @@
                 :href="temporalWorkflowsUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-indigo-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-primary-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-primary-500/30 rounded-lg px-2.5 py-1.5 transition-all"
                 :title="`Temporal — CustomerReference=${selectedRef}`"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -133,27 +143,27 @@
               <button
                 v-if="findOriginParams"
                 @click="copyFindOrigin"
-                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-violet-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-primary-500 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-primary-500/30 rounded-lg px-2.5 py-1.5 transition-all"
                 :title="findOriginCommand"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                FORGE FILE
+                FILE LINE
               </button>
               <button
                 v-if="findOriginMapCommand"
                 @click="copyFindOriginMap"
-                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-violet-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-primary-500 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-primary-500/30 rounded-lg px-2.5 py-1.5 transition-all"
                 :title="findOriginMapCommand"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
-                FORGE FILE & MAP
+                MAP FILE LINE
               </button>
-              <span v-if="copiedFindOrigin" class="text-xs text-emerald-400 ml-1">Copié</span>
+              <span v-if="copiedFindOrigin" class="text-xs text-primary-400 ml-1">Copié</span>
             </div>
           </div>
         </div>
@@ -162,7 +172,7 @@
       <!-- Résumé global -->
       <div class="bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-2xl p-6 shadow-xl">
         <h2 class="text-lg font-semibold text-slate-200 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           Résumé
@@ -379,16 +389,28 @@ const findOriginParams = computed(() => {
 const findOriginCommand = computed(() => {
   const p = findOriginParams.value
   if (!p) return ''
-  return `make find-origin REFERENCE=${p.reference} ADVERTISER_ID=${p.advertiserId}`
+  return `make find-origin REFERENCE="${p.reference}" ADVERTISER_ID=${p.advertiserId}`
 })
 
 const findOriginMapCommand = computed(() => {
   const p = findOriginParams.value
   if (!p || !p.gatewayId) return ''
-  return `make find-origin-map REFERENCE=${p.reference} ADVERTISER_ID=${p.advertiserId} GATEWAY_ID=${p.gatewayId}`
+  return `make find-origin-map REFERENCE="${p.reference}" ADVERTISER_ID=${p.advertiserId} GATEWAY_ID=${p.gatewayId}`
 })
 
 const copiedFindOrigin = ref<'find-origin' | 'find-origin-map' | null>(null)
+
+const refCopied = ref(false)
+
+async function copyRefToClipboard() {
+  const ref = selectedRef.value
+  if (!ref) return
+  try {
+    await navigator.clipboard.writeText(ref)
+    refCopied.value = true
+    setTimeout(() => { refCopied.value = false }, 2000)
+  } catch (_) {}
+}
 
 async function copyFindOrigin() {
   const cmd = findOriginCommand.value
@@ -476,8 +498,7 @@ function getMainTitle(): string {
   if (!listing) return '—'
   const type = listing.property_type?.name || 'Bien'
   const city = listing.property?.address?.city || ''
-  const ref = listing.property?.reference || ''
-  return [ref, type, city].filter(Boolean).join(' — ')
+  return [type, city].filter(Boolean).join(' — ')
 }
 
 function getLastModification(listing: any): string {
@@ -520,8 +541,12 @@ const fieldDefinitions = [
       { label: 'Surface terrain (m²)', path: 'fields.surface_terrain_fr' },
       { label: 'Pièces', path: 'fields.nb_piece_fr' },
       { label: 'Chambres', path: 'fields.nb_chambre_fr' },
-      { label: 'Exposition', path: 'fields.exposition_fr' },
       { label: 'Salles de bains', path: 'fields.nb_sd_bains_fr' },
+      { label: 'WC', path: 'fields.nb_wc_fr' },
+      { label: 'Places de parking', path: 'fields.places_parking_fr' },
+      { label: 'Terasses', path: 'fields.nb_terasse_fr' },
+      { label: 'Box', path: 'fields.nb_box_fr' },
+      { label: 'Exposition', path: 'fields.exposition_fr' },
       { label: 'Visite virtuelle', path: 'fields.visite_virtuelle_fr' },
       { label: 'Copropriété', path: 'fields.copropriete_fr' },
       { label: 'État', path: 'fields.etat_fr' },
@@ -646,6 +671,11 @@ function getFieldValue(obj: any, path: string): string {
   return String(value)
 }
 
+// Normalize Euro variants (e.g. U+0080 legacy vs U+20AC) to canonical € before comparing description
+function normalizeDescriptionForCompare(s: string): string {
+  return s.replace(/\u0080|\u20AC/g, '\u20AC')
+}
+
 // For confort_fr, strip "vue_degage" from integ array before comparing (INTEG-only quirk)
 function integValueForConfortCompare(iv: string): string {
   try {
@@ -665,6 +695,11 @@ function getStatusText(field: any): string {
   if (pv === '—' && iv === '—') return 'N/A'
   if (pv !== '—' && iv === '—') return 'MANQUE INTEG'
   if (pv === '—' && iv !== '—') return 'MANQUE PROD'
+  if (field.path === 'fields.description_fr') {
+    const npv = normalizeDescriptionForCompare(pv)
+    const niv = normalizeDescriptionForCompare(iv)
+    return npv.length === niv.length ? 'OK' : 'DIFF'
+  }
   if (valuesEqualForCompare(pv, iv)) return 'OK'
   return normalize(pv) === normalize(iv) ? 'OK' : 'DIFF'
 }

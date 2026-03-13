@@ -3,7 +3,7 @@
     <!-- Formulaire de recherche -->
     <div class="bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-2xl p-6 mb-8 shadow-xl">
       <h2 class="text-lg font-semibold mb-5 text-slate-200 flex items-center gap-2">
-        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         Recherche
@@ -17,7 +17,7 @@
             <select
               id="partenaire"
               v-model="form.partenaire"
-              class="w-full bg-slate-800 border border-slate-600 text-slate-100 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none"
+              class="w-full bg-slate-800 border border-slate-600 text-slate-100 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none"
             >
               <option value="">— Sélectionner —</option>
               <option v-for="p in partenaires" :key="p" :value="p">{{ p }}</option>
@@ -32,7 +32,7 @@
               v-model="form.codeAgence"
               type="text"
               placeholder="Ex: 12345"
-              class="w-full bg-slate-800 border border-slate-600 text-slate-100 rounded-lg px-3 py-2.5 placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none"
+              class="w-full bg-slate-800 border border-slate-600 text-slate-100 rounded-lg px-3 py-2.5 placeholder-slate-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none"
             />
           </div>
 
@@ -44,7 +44,7 @@
               v-model="form.refClient"
               type="text"
               placeholder="Ex: REF001"
-              class="w-full bg-slate-800 border border-slate-600 text-slate-100 rounded-lg px-3 py-2.5 placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none"
+              class="w-full bg-slate-800 border border-slate-600 text-slate-100 rounded-lg px-3 py-2.5 placeholder-slate-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all outline-none"
             />
           </div>
 
@@ -53,7 +53,7 @@
             <button
               type="submit"
               :disabled="loading || !form.partenaire || !form.codeAgence"
-              class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 shadow-lg shadow-emerald-500/20 disabled:shadow-none flex items-center justify-center gap-2"
+              class="w-full bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 shadow-lg shadow-primary-500/20 disabled:shadow-none flex items-center justify-center gap-2"
             >
               <svg v-if="loading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -79,7 +79,7 @@
               :class="[
                 'px-4 py-1.5 text-sm font-semibold transition-all duration-200 outline-none',
                 form.mediaId === portal.value
-                  ? 'bg-emerald-600 text-white shadow-inner'
+                  ? 'bg-primary-600 text-white shadow-inner'
                   : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
               ]"
             >
@@ -92,7 +92,7 @@
             v-if="hasResults"
             type="button"
             @click="exportCsv"
-            class="ml-auto inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-emerald-500/30 rounded-lg px-2.5 py-1.5 transition-all"
+            class="ml-auto inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-primary-300 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/40 hover:border-primary-500/30 rounded-lg px-2.5 py-1.5 transition-all"
             title="Exporter la liste des annonces en CSV"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -184,7 +184,7 @@
                   <span class="text-sm text-slate-300">{{ pair.prod.property_type?.name || '—' }}</span>
                 </div>
                 <div class="flex items-center gap-3 shrink-0">
-                  <span class="text-sm font-bold text-emerald-400">{{ formatPrice(pair.prod.fields?.price_fr) }}</span>
+                  <span class="text-sm font-bold text-primary-400">{{ formatPrice(pair.prod.fields?.price_fr) }}</span>
                   <svg class="w-4 h-4 text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
@@ -203,7 +203,7 @@
                   <span class="text-sm text-slate-300">{{ pair.integ.property_type?.name || '—' }}</span>
                 </div>
                 <div class="flex items-center gap-3 shrink-0">
-                  <span class="text-sm font-bold text-emerald-400">{{ formatPrice(pair.integ.fields?.price_fr) }}</span>
+                  <span class="text-sm font-bold text-primary-400">{{ formatPrice(pair.integ.fields?.price_fr) }}</span>
                   <svg class="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
@@ -248,7 +248,7 @@
                     <span class="text-sm text-slate-300">{{ listing.property_type?.name || '—' }}</span>
                   </div>
                   <div class="flex items-center gap-3 shrink-0">
-                    <span class="text-sm font-bold text-emerald-400">{{ formatPrice(listing.fields?.price_fr) }}</span>
+                    <span class="text-sm font-bold text-primary-400">{{ formatPrice(listing.fields?.price_fr) }}</span>
                     <svg class="w-4 h-4 text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
@@ -285,7 +285,7 @@
                     <span class="text-sm text-slate-300">{{ listing.property_type?.name || '—' }}</span>
                   </div>
                   <div class="flex items-center gap-3 shrink-0">
-                    <span class="text-sm font-bold text-emerald-400">{{ formatPrice(listing.fields?.price_fr) }}</span>
+                    <span class="text-sm font-bold text-primary-400">{{ formatPrice(listing.fields?.price_fr) }}</span>
                     <svg class="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
@@ -469,10 +469,12 @@ async function handleSubmit() {
 const compareFields = [
   'property.address.city', 'property.address.zipcode',
   'fields.surface_fr', 'fields.surface_terrain_fr',
-  'fields.nb_piece_fr', 'fields.nb_chambre_fr', 'fields.nb_sd_bains_fr',
+  'fields.nb_piece_fr', 'fields.nb_chambre_fr', 'fields.nb_sd_bains_fr', 'fields.nb_wc_fr', 'fields.places_parking_fr', 'fields.nb_terasse_fr', 'fields.nb_box_fr',
   'fields.exposition_fr', 'fields.etat_fr', 'fields.confort_fr', 'fields.copropriete_fr',
+  'fields.type_chauffage_fr',
   'fields.date_dpe_fr', 'fields.dpe_valeur_consommation_fr', 'fields.dpe_etiquette_consommation_fr',
   'fields.dpe_valeur_gaz_effet_serre_fr', 'fields.dpe_etiquette_gaz_effet_serre_fr',
+  'fields.description_fr',
   'fields.contact_email_fr', 'fields.nego_tel_fr', 'fields.contact_tel_fr', 'fields.contact_name_fr',
   'fields.price_fr', 'fields.honoraires_fr', 'fields.taxe_fonciere_fr', 'fields.charge_honoraires_fr',
 ]
@@ -507,6 +509,11 @@ function valuesEqualForCompare(pv: string, iv: string): boolean {
   return false
 }
 
+// Normalize Euro variants (e.g. U+0080 legacy vs U+20AC) to canonical € before comparing description
+function normalizeDescriptionForCompare(s: string): string {
+  return s.replace(/\u0080|\u20AC/g, '\u20AC')
+}
+
 // For confort_fr, strip "vue_degage" from integ array before comparing (INTEG-only quirk)
 function integValueForConfortCompare(iv: string): string {
   try {
@@ -525,8 +532,14 @@ function getDiffCount(prod: any, integ: any): number {
     let pv = getNestedValue(prod, path)
     let iv = getNestedValue(integ, path)
     if (path === 'fields.confort_fr') iv = integValueForConfortCompare(iv)
-    // Ne compter que si les 2 valeurs existent et sont différentes (array order ignored)
-    if (pv && iv && !valuesEqualForCompare(pv, iv)) diffs++
+    if (!pv || !iv) continue
+    if (path === 'fields.description_fr') {
+      const npv = normalizeDescriptionForCompare(pv)
+      const niv = normalizeDescriptionForCompare(iv)
+      if (npv.length !== niv.length) diffs++
+    } else if (!valuesEqualForCompare(pv, iv)) {
+      diffs++
+    }
   }
   return diffs
 }
@@ -580,7 +593,7 @@ function openApiUrl(env: string) {
 
 function exportCsv() {
   const sep = ';'
-  const headers = ['Référence', 'Type', 'Ville', 'CP', 'Prix PROD', 'Prix INTEG', 'Statut', 'Nb Diffs', 'Présence']
+  const headers = ['Référence', 'Type', 'Ville', 'CP', 'Gateway', 'Advertiser ID', 'Prix PROD', 'Prix INTEG', 'Statut', 'Nb Diffs', 'Présence']
   const rows: string[][] = []
 
   function esc(val: any): string {
@@ -600,14 +613,28 @@ function exportCsv() {
     return String(value)
   }
 
+  function getGateway(listing: any): string {
+    const gw = listing?.gateways
+    if (Array.isArray(gw) && gw.length > 0) return gw[0]?.name || gw[0]?.code || ''
+    return ''
+  }
+
+  function getAdvertiserId(listing: any): string {
+    const id = listing?.property?.advertiser_id ?? listing?.advertiser_id
+    return id != null ? String(id) : ''
+  }
+
   // Annonces matchées
   for (const pair of matchedListings.value) {
     const diffs = getDiffCount(pair.prod, pair.integ)
+    const listing = pair.prod || pair.integ
     rows.push([
       esc(pair.ref),
       esc(getVal(pair.prod, 'property.type')),
       esc(getVal(pair.prod, 'property.address.city')),
       esc(getVal(pair.prod, 'property.address.zipcode')),
+      esc(getGateway(listing)),
+      esc(getAdvertiserId(listing)),
       esc(getVal(pair.prod, 'fields.price_fr')),
       esc(getVal(pair.integ, 'fields.price_fr')),
       esc(diffs === 0 ? 'ISO' : 'DIFF'),
@@ -623,6 +650,8 @@ function exportCsv() {
       esc(getVal(listing, 'property.type')),
       esc(getVal(listing, 'property.address.city')),
       esc(getVal(listing, 'property.address.zipcode')),
+      esc(getGateway(listing)),
+      esc(getAdvertiserId(listing)),
       esc(getVal(listing, 'fields.price_fr')),
       esc(''),
       esc('MANQUE INTEG'),
@@ -638,6 +667,8 @@ function exportCsv() {
       esc(getVal(listing, 'property.type')),
       esc(getVal(listing, 'property.address.city')),
       esc(getVal(listing, 'property.address.zipcode')),
+      esc(getGateway(listing)),
+      esc(getAdvertiserId(listing)),
       esc(''),
       esc(getVal(listing, 'fields.price_fr')),
       esc('MANQUE PROD'),
