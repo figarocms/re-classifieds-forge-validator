@@ -45,6 +45,22 @@
             <p class="text-sm text-slate-400">
               Annonce {{ selectedRef }} — {{ getMainTitle() }}
             </p>
+            <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
+              <div v-if="prodListing" class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-sky-300">PROD:</span>
+                <span>{{ prodModifiedDate }}</span>
+              </div>
+              <div v-if="integListing" class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-amber-300">INTEG:</span>
+                <span>{{ integModifiedDate }}</span>
+              </div>
+            </div>
             <p v-if="searchParams.partenaire || searchParams.codeAgence" class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -207,7 +223,7 @@
               >
                 <img
                   :src="getPhotoUrl(photo)"
-                  :alt="'PROD photo ' + (idx + 1)"
+                  :alt="'PROD photo ' + ((idx as number) + 1)"
                   class="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                   loading="lazy"
                 />
@@ -233,7 +249,7 @@
               >
                 <img
                   :src="getPhotoUrl(photo)"
-                  :alt="'INTEG photo ' + (idx + 1)"
+                  :alt="'INTEG photo ' + ((idx as number) + 1)"
                   class="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                   loading="lazy"
                 />
@@ -381,6 +397,35 @@ function getMainTitle(): string {
   const ref = listing.property?.reference || ''
   return [ref, type, city].filter(Boolean).join(' — ')
 }
+
+function formatDate(dateString: string | undefined | null): string {
+  if (!dateString) return '—'
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return '—'
+    return new Intl.DateTimeFormat('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date)
+  } catch {
+    return '—'
+  }
+}
+
+const prodModifiedDate = computed(() => {
+  const listing = prodListing.value
+  if (!listing) return '—'
+  return formatDate(listing.updated_at || listing.modified_at || listing.last_modified)
+})
+
+const integModifiedDate = computed(() => {
+  const listing = integListing.value
+  if (!listing) return '—'
+  return formatDate(listing.updated_at || listing.modified_at || listing.last_modified)
+})
 
 // Définition des catégories de comparaison (sans Médias car les photos sont affichées en vignettes)
 const fieldDefinitions = [
@@ -547,7 +592,17 @@ function getFieldValue(obj: any, path: string): string {
 
   if (value == null || value === '') return '—'
   if (typeof value === 'object') {
-    if (Array.isArray(value)) return JSON.stringify(value)
+    if (Array.isArray(value)) {
+      // Special handling for confort arrays: remove "vue_degagee" and sort
+      if (path === 'fields.confort_fr') {
+        const filtered = value.filter((item: any) => item !== 'vue_degagee')
+        const sorted = [...filtered].sort((a: any, b: any) => String(a).localeCompare(String(b)))
+        return JSON.stringify(sorted)
+      }
+      // For other arrays, sort them before stringifying
+      const sorted = [...value].sort((a: any, b: any) => String(a).localeCompare(String(b)))
+      return JSON.stringify(sorted)
+    }
     if (value.name) return String(value.name)
     return JSON.stringify(value)
   }
