@@ -757,23 +757,36 @@ function normalizeDescriptionForCompare(s: string): string {
   return s.replace(/\u0080|\u20AC/g, '\u20AC')
 }
 
-// For confort_fr, strip "vue_degage" from integ array before comparing (INTEG-only quirk)
-function integValueForConfortCompare(iv: string): string {
+// Enrichissements par rapport à PROD OK : ignore "vue_degage" et "garage" dans le confort sauf si uniquement PROD
+const CONFORT_IGNORE = ['vue_degage', 'garage']
+function confortNormalizeForCompare(s: string): string {
   try {
-    const arr = JSON.parse(iv)
+    const arr = JSON.parse(s)
     if (Array.isArray(arr)) {
-      const filtered = arr.filter((x: any) => String(x).toLowerCase() !== 'vue_degage')
+      const filtered = arr.filter((x: any) => !CONFORT_IGNORE.includes(String(x).toLowerCase()))
       return JSON.stringify(filtered)
     }
   } catch (_) {}
-  return iv
+  return s
+}
+
+// Treat 0 and nil/empty as equivalent (do not flag diff or manque)
+function isZeroOrNil(s: string): boolean {
+  const t = s.trim().toLowerCase()
+  return t === '' || t === '—' || t === '0'
 }
 
 function getStatusText(field: any): string {
-  const pv = String(field.prodValue ?? '—')
+  let pv = String(field.prodValue ?? '—')
   let iv = String(field.integValue ?? '—')
-  if (field.path === 'fields.confort_fr') iv = integValueForConfortCompare(iv)
+  if (field.path === 'fields.confort_fr' && pv !== '—' && iv !== '—') {
+    pv = confortNormalizeForCompare(pv)
+    iv = confortNormalizeForCompare(iv)
+  }
   if (pv === '—' && iv === '—') return 'N/A'
+  if (isZeroOrNil(pv) && isZeroOrNil(iv)) return 'OK'
+  if (pv === '—' && isZeroOrNil(iv)) return 'OK'
+  if (iv === '—' && isZeroOrNil(pv)) return 'OK'
   if (pv !== '—' && iv === '—') return 'MANQUE INTEG'
   if (pv === '—' && iv !== '—') return 'MANQUE PROD'
   if (field.path === 'fields.description_fr') {

@@ -661,16 +661,23 @@ function normalizeDescriptionForCompare(s: string): string {
   return s.replace(/\u0080|\u20AC/g, '\u20AC')
 }
 
-// For confort_fr, strip "vue_degage" from integ array before comparing (INTEG-only quirk)
-function integValueForConfortCompare(iv: string): string {
+// For confort_fr, strip "vue_degage" and "garage" from array before comparing (ignore list)
+const CONFORT_IGNORE = ['vue_degage', 'garage']
+function confortNormalizeForCompare(s: string): string {
   try {
-    const arr = JSON.parse(iv)
+    const arr = JSON.parse(s)
     if (Array.isArray(arr)) {
-      const filtered = arr.filter((x: any) => String(x).toLowerCase() !== 'vue_degage')
+      const filtered = arr.filter((x: any) => !CONFORT_IGNORE.includes(String(x).toLowerCase()))
       return JSON.stringify(filtered)
     }
   } catch (_) {}
-  return iv
+  return s
+}
+
+// Treat 0 and nil/empty as equivalent (do not flag diff)
+function isZeroOrNil(s: string): boolean {
+  const t = s.trim().toLowerCase()
+  return t === '' || t === '—' || t === '0'
 }
 
 function getDiffCount(prod: any, integ: any): number {
@@ -678,7 +685,11 @@ function getDiffCount(prod: any, integ: any): number {
   for (const path of compareFields) {
     let pv = getNestedValue(prod, path)
     let iv = getNestedValue(integ, path)
-    if (path === 'fields.confort_fr') iv = integValueForConfortCompare(iv)
+    if (path === 'fields.confort_fr' && pv && iv) {
+      pv = confortNormalizeForCompare(pv)
+      iv = confortNormalizeForCompare(iv)
+    }
+    if (isZeroOrNil(pv) && isZeroOrNil(iv)) continue
     if (!pv || !iv) continue
     if (path === 'fields.description_fr') {
       const npv = normalizeDescriptionForCompare(pv)
