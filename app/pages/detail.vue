@@ -572,6 +572,7 @@ const fieldDefinitions = [
     name: 'Localisation',
     icon: '📍',
     fields: [
+      { label: 'Adresse', path: 'property.address.address1' },
       { label: 'Ville', path: 'property.address.city' },
       { label: 'Code Postal', path: 'property.address.zipcode' },
       { label: 'Quartier', path: 'fields.quartier_fr' },
@@ -596,6 +597,7 @@ const fieldDefinitions = [
       { label: 'Exposition', path: 'fields.exposition_fr' },
       { label: 'Visite virtuelle', path: 'fields.visite_virtuelle_fr' },
       { label: 'Copropriété', path: 'fields.copropriete_fr' },
+      { label: 'Nb lots', path: 'fields.nb_lots_fr' },
       { label: 'État', path: 'fields.etat_fr' },
     ],
   },
@@ -608,6 +610,7 @@ const fieldDefinitions = [
       { label: 'Meublé', path: 'fields.meuble_fr' },
       { label: 'Confort', path: 'fields.confort_fr' },
       { label: 'Confort PDF', path: 'fields.confort_pdf_fr' },
+      { label: 'Aménagement handicapés', path: 'fields.amenagement_handicapes_fr' },
     ],
   },
   {
@@ -752,9 +755,16 @@ function getFieldValue(obj: any, path: string): string {
   return String(value)
 }
 
-// Normalize Euro variants (e.g. U+0080 legacy vs U+20AC) to canonical € before comparing description
+// Legacy/variant chars → canonical Unicode before comparing description (decoder-style)
 function normalizeDescriptionForCompare(s: string): string {
-  return s.replace(/\u0080|\u20AC/g, '\u20AC')
+  let t = typeof s !== 'string' ? String(s) : s
+  t = t.normalize('NFC')
+  t = t.replace(/\u0080|\u00A4|\u20AC/g, '\u20AC')   // Euro variants → €
+  t = t.replace(/\u0096/g, '\u2013')                  // CP1252 dash → en dash
+  t = t.replace(/[\u2010-\u2015]/g, '\u2013')        // hyphen/dash variants → en dash
+  t = t.replace(/\s*&\s*/g, '  ')                     // " & " or "&" between words → double space (align PROD/INTEG)
+  t = t.replace(/\s{2,}/g, '  ')                      // collapse 3+ spaces to 2 so length comparable
+  return t.trim()                                     // ignore trailing/leading space and newlines (e.g. ".\n" vs ".")
 }
 
 // Enrichissements par rapport à PROD OK : ignore "vue_degage" et "garage" dans le confort sauf si uniquement PROD

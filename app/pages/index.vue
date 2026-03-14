@@ -614,11 +614,11 @@ async function handleSubmit() {
 
 // Champs comparés pour le calcul rapide du statut ISO
 const compareFields = [
-  'property.address.city', 'property.address.zipcode',
+  'property.address.address1', 'property.address.city', 'property.address.zipcode',
   'fields.surface_fr', 'fields.surface_terrain_fr',
   'fields.nb_piece_fr', 'fields.nb_chambre_fr', 'fields.nb_sd_bains_fr', 'fields.nb_wc_fr', 'fields.places_parking_fr', 'fields.nb_terasse_fr', 'fields.nb_box_fr',
-  'fields.exposition_fr', 'fields.etat_fr', 'fields.confort_fr', 'fields.copropriete_fr',
-  'fields.type_chauffage_fr',
+  'fields.exposition_fr', 'fields.etat_fr', 'fields.confort_fr', 'fields.copropriete_fr', 'fields.nb_lots_fr',
+  'fields.type_chauffage_fr', 'fields.amenagement_handicapes_fr',
   'fields.date_dpe_fr', 'fields.dpe_valeur_consommation_fr', 'fields.dpe_etiquette_consommation_fr',
   'fields.dpe_valeur_gaz_effet_serre_fr', 'fields.dpe_etiquette_gaz_effet_serre_fr',
   'fields.description_fr',
@@ -656,9 +656,16 @@ function valuesEqualForCompare(pv: string, iv: string): boolean {
   return false
 }
 
-// Normalize Euro variants (e.g. U+0080 legacy vs U+20AC) to canonical € before comparing description
+// Legacy/variant chars → canonical Unicode before comparing description (decoder-style)
 function normalizeDescriptionForCompare(s: string): string {
-  return s.replace(/\u0080|\u20AC/g, '\u20AC')
+  let t = typeof s !== 'string' ? String(s) : s
+  t = t.normalize('NFC')
+  t = t.replace(/\u0080|\u00A4|\u20AC/g, '\u20AC')   // Euro variants → €
+  t = t.replace(/\u0096/g, '\u2013')                  // CP1252 dash → en dash
+  t = t.replace(/[\u2010-\u2015]/g, '\u2013')        // hyphen/dash variants → en dash
+  t = t.replace(/\s*&\s*/g, '  ')                     // " & " or "&" between words → double space (align PROD/INTEG)
+  t = t.replace(/\s{2,}/g, '  ')                      // collapse 3+ spaces to 2 so length comparable
+  return t.trim()                                     // ignore trailing/leading space and newlines (e.g. ".\n" vs ".")
 }
 
 // For confort_fr, strip "vue_degage" and "garage" from array before comparing (ignore list)
